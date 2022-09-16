@@ -15,8 +15,7 @@ import kotlin.math.roundToInt
 
 class DrawView(context: Context, attrs: AttributeSet): View(context, attrs) {
 
-    // Для устранения ошибок из версии 1, когда появлялся угол,
-    // нужно вычислить приращения по осям x и y (dy и dx)
+    // Удаление "костыля", когда доступно только два нажатия на экран, а затем нужно очищать канвас
 
     private var mPaint = Paint()
     private var mPath = Path()
@@ -58,9 +57,19 @@ class DrawView(context: Context, attrs: AttributeSet): View(context, attrs) {
         mCurY = y
 
         count++
+
         if (count < 2) {
             x1 = x
             y1 = y
+        }
+        else if(count > 2) {
+            if (count % 2 == 0) { // здесь мы считаем, какая по счету идет итерация, так как если итерация нечетная, то мы забываем про предыдующую нечетную итерацию. Точно так же и с нечетной
+                x2 = x
+                y2 = y
+            } else {
+                x1 = x
+                y1 = y
+            }
         }
         else {
             x2 = x
@@ -77,9 +86,8 @@ class DrawView(context: Context, attrs: AttributeSet): View(context, attrs) {
 
         Log.d("sex20", "x1: ${x1.roundToInt()}, y1: ${y1.roundToInt()}, x2: ${x2.roundToInt()}, y2: ${y2.roundToInt()}")
 
-        if (count == 2) {
+        if (count == 2 || count > 2) {
             algVersion2(x1, y1, x2, y2)
-            //alg(x1, y1, x2, y2)
         }
     }
 
@@ -109,8 +117,8 @@ class DrawView(context: Context, attrs: AttributeSet): View(context, attrs) {
             length++
 
             repeat(length.toInt()) {
-                drawPoint(x, y)
-                //mPath.lineTo(x, y)
+                //drawPoint(x, y)
+                mPath.lineTo(x, y)
 
                 Log.d("sex", "x: ${x.roundToInt()}, y: ${y.roundToInt()}")
 
@@ -124,7 +132,8 @@ class DrawView(context: Context, attrs: AttributeSet): View(context, attrs) {
 
             length++
             repeat(length.toInt()) {
-                drawPoint(x, y)
+                //drawPoint(x, y)
+                mPath.lineTo(x, y)
                 x+= dx * lengthX / lengthY
                 y+= dy
             }
