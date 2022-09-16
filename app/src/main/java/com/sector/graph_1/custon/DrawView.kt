@@ -9,13 +9,13 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import androidx.core.content.ContextCompat
+import com.sector.graph_1.R
 import java.lang.Float.max
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
 class DrawView(context: Context, attrs: AttributeSet): View(context, attrs) {
-
-    // Удаление "костыля", когда доступно только два нажатия на экран, а затем нужно очищать канвас
 
     private var mPaint = Paint()
     private var mPath = Path()
@@ -33,7 +33,7 @@ class DrawView(context: Context, attrs: AttributeSet): View(context, attrs) {
 
     init {
         mPaint.apply {
-            color = Color.RED
+            color = ContextCompat.getColor(context, R.color.primary)
             style = Paint.Style.STROKE
             strokeJoin = Paint.Join.ROUND
             strokeCap = Paint.Cap.ROUND
@@ -79,29 +79,30 @@ class DrawView(context: Context, attrs: AttributeSet): View(context, attrs) {
 
     private fun actionUp() {
         // рисует линию от текущей точки до указанной, следующее рисование пойдет уже от указанной точки
-        mPath.lineTo(mCurX, mCurY)
-        mPath.lineTo(mCurX, mCurY + 1)
-        mPath.lineTo(mCurX + 1, mCurY + 1)
-        mPath.lineTo(mCurX + 1, mCurY)
-
-        Log.d("sex20", "x1: ${x1.roundToInt()}, y1: ${y1.roundToInt()}, x2: ${x2.roundToInt()}, y2: ${y2.roundToInt()}")
+        drawPoint(mCurX, mCurY)
 
         if (count == 2 || count > 2) {
-            algVersion2(x1, y1, x2, y2)
+            algorithmBresenham(x1, y1, x2, y2)
         }
     }
 
     fun clearCanvas() {
+        resetValues()
+        mPath.reset()
+        invalidate()
+    }
+
+    private fun resetValues() {
         count = 0
         x1 = 0f
         y1 = 0f
         x2 = 0f
         y2 = 0f
-        mPath.reset()
-        invalidate()
     }
 
-    private fun algVersion2(x1: Float, y1: Float, x2: Float, y2: Float) {
+    private fun algorithmBresenham(x1: Float, y1: Float, x2: Float, y2: Float) {
+
+        // Определение четверти
         var dx = if ((x2 - x1) >= 0) 1 else -1
         var dy = if ((y2 - y1) >= 0) 1 else -1
 
@@ -117,10 +118,7 @@ class DrawView(context: Context, attrs: AttributeSet): View(context, attrs) {
             length++
 
             repeat(length.toInt()) {
-                //drawPoint(x, y)
                 mPath.lineTo(x, y)
-
-                Log.d("sex", "x: ${x.roundToInt()}, y: ${y.roundToInt()}")
 
                 x+=dx
                 y+= dy * lengthY / lengthX
@@ -132,8 +130,8 @@ class DrawView(context: Context, attrs: AttributeSet): View(context, attrs) {
 
             length++
             repeat(length.toInt()) {
-                //drawPoint(x, y)
                 mPath.lineTo(x, y)
+
                 x+= dx * lengthX / lengthY
                 y+= dy
             }
