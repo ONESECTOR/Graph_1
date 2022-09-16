@@ -15,6 +15,9 @@ import kotlin.math.roundToInt
 
 class DrawView(context: Context, attrs: AttributeSet): View(context, attrs) {
 
+    // Для устранения ошибок из версии 1, когда появлялся угол,
+    // нужно вычислить приращения по осям x и y (dy и dx)
+
     private var mPaint = Paint()
     private var mPath = Path()
 
@@ -75,7 +78,8 @@ class DrawView(context: Context, attrs: AttributeSet): View(context, attrs) {
         Log.d("sex20", "x1: ${x1.roundToInt()}, y1: ${y1.roundToInt()}, x2: ${x2.roundToInt()}, y2: ${y2.roundToInt()}")
 
         if (count == 2) {
-            alg(x1, y1, x2, y2)
+            algVersion2(x1, y1, x2, y2)
+            //alg(x1, y1, x2, y2)
         }
     }
 
@@ -89,7 +93,10 @@ class DrawView(context: Context, attrs: AttributeSet): View(context, attrs) {
         invalidate()
     }
 
-    private fun alg(x1: Float, y1: Float, x2: Float, y2: Float) {
+    private fun algVersion2(x1: Float, y1: Float, x2: Float, y2: Float) {
+        var dx = if ((x2 - x1) >= 0) 1 else -1
+        var dy = if ((y2 - y1) >= 0) 1 else -1
+
         val lengthX = abs(x2 - x1)
         val lengthY = abs(y2 - y1)
 
@@ -107,8 +114,8 @@ class DrawView(context: Context, attrs: AttributeSet): View(context, attrs) {
 
                 Log.d("sex", "x: ${x.roundToInt()}, y: ${y.roundToInt()}")
 
-                x++
-                y+= lengthY / lengthX
+                x+=dx
+                y+= dy * lengthY / lengthX
             }
         }
         else {
@@ -118,8 +125,8 @@ class DrawView(context: Context, attrs: AttributeSet): View(context, attrs) {
             length++
             repeat(length.toInt()) {
                 drawPoint(x, y)
-                x+= lengthX / lengthY
-                y++
+                x+= dx * lengthX / lengthY
+                y+= dy
             }
         }
     }
